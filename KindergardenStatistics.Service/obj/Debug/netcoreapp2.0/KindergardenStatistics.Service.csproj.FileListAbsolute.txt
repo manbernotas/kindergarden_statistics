@@ -1,0 +1,13 @@
+c:\users\mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.Service.deps.json
+c:\users\mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.Service.runtimeconfig.json
+c:\users\mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.Service.runtimeconfig.dev.json
+c:\users\mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.Service.dll
+c:\users\mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.Service.pdb
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.csprojResolveAssemblyReference.cache
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.csproj.CoreCompileInputs.cache
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.AssemblyInfoInputs.cache
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.AssemblyInfo.cs
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.dll
+c:\users\mantas\source\repos\KindergardenStatistics.Service\obj\Debug\netcoreapp2.0\KindergardenStatistics.Service.pdb
+C:\Users\Mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.DAL.dll
+C:\Users\Mantas\source\repos\KindergardenStatistics.Service\bin\Debug\netcoreapp2.0\KindergardenStatistics.DAL.pdb

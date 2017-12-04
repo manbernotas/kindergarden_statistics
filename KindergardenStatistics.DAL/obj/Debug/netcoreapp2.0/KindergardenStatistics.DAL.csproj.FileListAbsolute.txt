@@ -1,0 +1,9 @@
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\bin\Debug\netcoreapp2.0\KindergardenStatistics.DAL.deps.json
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\bin\Debug\netcoreapp2.0\KindergardenStatistics.DAL.dll
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\bin\Debug\netcoreapp2.0\KindergardenStatistics.DAL.pdb
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.csprojResolveAssemblyReference.cache
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.csproj.CoreCompileInputs.cache
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.AssemblyInfoInputs.cache
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.AssemblyInfo.cs
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.dll
+C:\Users\Mantas\source\repos\KindergardenStatistics.DAL\obj\Debug\netcoreapp2.0\KindergardenStatistics.DAL.pdb
