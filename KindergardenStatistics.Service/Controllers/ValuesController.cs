@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using KindergardenStatistics.DAL;
+using KindergardenStatistics.BL;
 
 namespace KindergardenStatistics.Service.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private KindergardenManager km;
+
+        public ValuesController()
+        {
+           km = new KindergardenManager();
+        }
         // GET api/values
         [HttpGet]
-        public List<Kindergarden> Get()
+        public List<DAL.Kindergarden> Get()
         {
-            Repository repository = new Repository();
-
-            var kindergardens = repository.GetKindergardens();
+            var kindergardens = km.GetKindergardens();
 
             return kindergardens;
         }
@@ -25,8 +29,7 @@ namespace KindergardenStatistics.Service.Controllers
         [Route("names")]
         public List<String> GetAllKindergardenNames()
         {
-            Repository repository = new Repository();
-            var kindergardens = repository.GetKindergardens();
+            var kindergardens = km.GetKindergardens();
             var kgNames = new List<String>();
 
             foreach (var kg in kindergardens)
@@ -43,11 +46,9 @@ namespace KindergardenStatistics.Service.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public Child GetChild(int id)
+        public DAL.Child GetChild(int id)
         {
-            Repository repository = new Repository();
-
-            return repository.GetChild(id);
+            return km.GetChild(id);
         }
 
         /// <summary>
@@ -58,9 +59,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("{id}/kindergarden")]
         public string GetChildsKindergarden(int id)
         {
-            Repository repository = new Repository();
-
-            return repository.GetChildsKindergarden(id);
+            return km.GetChildsKindergarden(id);
         }
 
         /// <summary>
@@ -70,9 +69,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("most-sick-group")]
         public string GetMostSick()
         {
-            Repository repository = new Repository();
-
-            return repository.GetMostSickGroup();
+            return km.GetMostSickGroup();
         }
 
         /// <summary>
@@ -82,9 +79,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("healthiest-group")]
         public string GetHealthiestGroup()
         {
-            Repository repository = new Repository();
-
-            return repository.GetHealthiestGroup();
+            return km.GetHealthiestGroup();
         }
 
         /// <summary>
@@ -94,9 +89,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("healthiest-kg")]
         public string GetHealthiestKg()
         {
-            Repository repository = new Repository();
-
-            return repository.GetHealthiestKg();
+            return km.GetHealthiestKg();
         }
 
         /// <summary>
@@ -106,9 +99,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("most-sick-kg")]
         public string GetMostSickKg()
         {
-            Repository repository = new Repository();
-
-            return repository.GetMostSickKg();
+            return km.GetMostSickKg();
         }
 
         /// <summary>
@@ -118,9 +109,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("top-attendance")]
         public List<int> GetTopAttendance()
         {
-            Repository repository = new Repository();
-
-            return repository.GetTopAttendance();
+            return km.GetChildrenIdOrderdByAttendance();
         }
 
         /// <summary>
@@ -129,9 +118,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("top-kg")]
         public List<string> GetTopAttendanceKg()
         {
-            Repository repository = new Repository();
-
-            return repository.GetTopAttendanceKg();
+            return km.GetTopAttendanceKg();
         }
 
         // POST api/values

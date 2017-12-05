@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KindergardenStatistics.DAL\KindergardenStatistics.DAL.csproj" />
+    <ProjectReference Include="..\KindergardenStatistics.BL\KindergardenStatistics.BL.csproj" />
   </ItemGroup>
 
 </Project>
