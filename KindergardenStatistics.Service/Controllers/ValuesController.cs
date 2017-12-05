@@ -36,12 +36,6 @@ namespace KindergardenStatistics.Service.Controllers
             
             return kgNames;
         }
-        // TODO: Labiausiai serganti grupe
-        // TODO: Sveikiausia grupe
-        // TODO: Sveikiausias darzelis
-        // TODO: Nesveikiausias darzelis
-        // TODO: Grazinti vaikus pagal ju lankomuma (nuo geriausio iki prasciausio)
-        // TODO: Grazinti 2 geriausius darzelius
 
         /// <summary>
         /// Grazinti vaika pagal id
@@ -55,6 +49,7 @@ namespace KindergardenStatistics.Service.Controllers
 
             return repository.GetChild(id);
         }
+
         /// <summary>
         /// Kuriam darzeli vaikas pagal vaiko id
         /// </summary>
@@ -67,17 +62,76 @@ namespace KindergardenStatistics.Service.Controllers
 
             return repository.GetChildsKindergarden(id);
         }
+
         /// <summary>
         /// Labiausiai serganti grupe
         /// </summary>
-        /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("most-sick")]
+        [HttpGet("most-sick-group")]
         public string GetMostSick()
         {
             Repository repository = new Repository();
 
-            return repository.GetMostSick();
+            return repository.GetMostSickGroup();
+        }
+
+        /// <summary>
+        /// Sveikiausia grupe
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("healthiest-group")]
+        public string GetHealthiestGroup()
+        {
+            Repository repository = new Repository();
+
+            return repository.GetHealthiestGroup();
+        }
+
+        /// <summary>
+        /// Sveikiausias darzelis
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("healthiest-kg")]
+        public string GetHealthiestKg()
+        {
+            Repository repository = new Repository();
+
+            return repository.GetHealthiestKg();
+        }
+
+        /// <summary>
+        /// Labiausiai sergantis darzelis
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("most-sick-kg")]
+        public string GetMostSickKg()
+        {
+            Repository repository = new Repository();
+
+            return repository.GetMostSickKg();
+        }
+
+        /// <summary>
+        /// Grazinti vaikus pagal ju lankomuma (nuo geriausio iki prasciausio)
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("top-attendance")]
+        public List<int> GetTopAttendance()
+        {
+            Repository repository = new Repository();
+
+            return repository.GetTopAttendance();
+        }
+
+        /// <summary>
+        /// Grazinti 2 geriausiai lankomus darzelius
+        /// </summary>
+        [HttpGet("top-kg")]
+        public List<string> GetTopAttendanceKg()
+        {
+            Repository repository = new Repository();
+
+            return repository.GetTopAttendanceKg();
         }
 
         // POST api/values

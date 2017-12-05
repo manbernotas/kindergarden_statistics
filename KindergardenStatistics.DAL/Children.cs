@@ -12,6 +12,6 @@ namespace KindergardenStatistics.DAL
 
         public int GroupId { get; set; }
 
-        public List<Attendance> Attendences { get; set; } = new List<Attendance>();
+        public List<Attendance> Attendances { get; set; } = new List<Attendance>();
     }
 }

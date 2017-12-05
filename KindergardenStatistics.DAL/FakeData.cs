@@ -24,7 +24,7 @@ namespace KindergardenStatistics.DAL
                             Id = 1,
                             GroupId = 1,
                             RegisteredInCity = true,
-                            Attendences = new List<Attendance>()
+                            Attendances = new List<Attendance>()
                             {
                                 new Attendance()
                                 {
@@ -51,7 +51,7 @@ namespace KindergardenStatistics.DAL
                             Id = 2,
                             GroupId = 2,
                             RegisteredInCity = false,
-                            Attendences = new List<Attendance>()
+                            Attendances = new List<Attendance>()
                             {
                                 new Attendance()
                                 {
