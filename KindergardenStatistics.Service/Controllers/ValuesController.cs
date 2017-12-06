@@ -109,16 +109,16 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("top-attendance")]
         public List<int> GetTopAttendance()
         {
-            return km.GetChildrenIdOrderdByAttendance();
+            return km.GetChildrenIdOrderedByAttendance();
         }
 
         /// <summary>
         /// Grazinti 2 geriausiai lankomus darzelius
         /// </summary>
         [HttpGet("top-kg")]
-        public List<string> GetTopAttendanceKg()
+        public List<string> GetTopTwoKgNamesOrderedByAttendance()
         {
-            return km.GetTopAttendanceKg();
+            return km.GetTopTwoKgNamesOrderedByAttendance();
         }
 
         // POST api/values
