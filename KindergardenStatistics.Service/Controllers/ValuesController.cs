@@ -67,7 +67,7 @@ namespace KindergardenStatistics.Service.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("most-sick-group")]
-        public string GetMostSick()
+        public string GetMostSickGroup()
         {
             return km.GetMostSickGroup();
         }

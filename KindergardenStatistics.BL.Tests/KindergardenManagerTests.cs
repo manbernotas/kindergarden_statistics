@@ -8,6 +8,7 @@ namespace KindergardenStatistics.BL.Tests
     [TestClass]
     public class KindergardenManagerTests
     {
+
         public Kindergarden Kindergarden = new Kindergarden()
         {
             Id = 1,
@@ -85,6 +86,56 @@ namespace KindergardenStatistics.BL.Tests
             var kindergardens = km.GetKindergardens();
 
             Assert.AreEqual(4, kindergardens.Count);
+        }
+
+        [TestMethod]
+        public void GetChildOK()
+        {
+            var kg = new List<Kindergarden>()
+            {
+                Kindergarden, Kindergarden
+            };
+
+            var repo = new Repository(kg);
+            var km = new KindergardenManager(repo);
+            for (int i = 1; i < 3; i++)
+            {
+                var child = km.GetChild(i);
+                Assert.AreEqual(i, child.Id);
+            }
+        }
+
+        [TestMethod]
+        public void GetChildsKindergardenOK()
+        {
+            var kg = new List<Kindergarden>()
+            {
+                Kindergarden, Kindergarden
+            };
+
+            var repo = new Repository(kg);
+            var km = new KindergardenManager(repo);
+            for (int i = 1; i < 3; i++)
+            {
+                var childsKg = km.GetChildsKindergarden(i);
+                Assert.AreEqual("Aitvaras", childsKg);
+            }
+        }
+
+        [TestMethod]
+        public void GetMostSickGroupOK()
+        {
+            var kg = new List<Kindergarden>()
+            {
+                Kindergarden, Kindergarden
+            };
+
+            var repo = new Repository(kg);
+            var km = new KindergardenManager(repo);
+            
+            var mostSickGroup = km.GetMostSickGroup();
+            Assert.AreEqual("VIJURKAI (ALERG.)", mostSickGroup);
+            
         }
     }
 }

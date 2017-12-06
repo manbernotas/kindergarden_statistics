@@ -70,8 +70,7 @@ namespace KindergardenStatistics.BL
 
             foreach (var group in groups)
             {
-                int sick = groups
-                    .SelectMany(grp => grp.Children)
+                int sick = group.Children
                     .SelectMany(cld => cld.Attendances)
                     .Sum(att => att.Sick);
                 
@@ -80,6 +79,7 @@ namespace KindergardenStatistics.BL
                     mostSick = sick;
                     mostSickGroupName = group.Name;
                 }
+                sick = 0;
             }
 
             return mostSickGroupName;
@@ -93,8 +93,7 @@ namespace KindergardenStatistics.BL
 
             foreach (var group in groups)
             {
-                int sick = groups
-                    .SelectMany(grp => grp.Children)
+                int sick = group.Children
                     .SelectMany(cld => cld.Attendances)
                     .Sum(att => att.Sick);
 

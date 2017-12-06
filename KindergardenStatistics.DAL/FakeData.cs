@@ -36,6 +36,24 @@ namespace KindergardenStatistics.DAL
                                     OtherReasons = 0,
                                 }
                             },
+                        },
+                        new Child()
+                        {
+                            Id = 3,
+                            GroupId = 1,
+                            RegisteredInCity = true,
+                            Attendances = new List<Attendance>()
+                            {
+                                new Attendance()
+                                {
+                                    ChildId = 3,
+                                    Date = new DateTime(2017, 10, 1),
+                                    Id = 3,
+                                    NoReasons = 0,
+                                    Sick = 2,
+                                    OtherReasons = 0,
+                                }
+                            },
                         }
                     }
                 },
