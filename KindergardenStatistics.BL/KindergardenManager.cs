@@ -1,20 +1,27 @@
 ﻿using KindergardenStatistics.DAL;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace KindergardenStatistics.BL
 {
+
     public class KindergardenManager
     {
+        private KindergardenContext context;
+
         private Repository repo;
 
-        public KindergardenManager()
+        static readonly string Separator = ";";
+
+        public KindergardenManager(KindergardenContext context)
         {
-            repo = new Repository();
+            repo = new Repository(context);
+            this.context = context;
         }
 
-        public KindergardenManager(Repository repo)
+        public KindergardenManager(KindergardenContext context, Repository repo)
         {
             this.repo = repo;
         }
@@ -31,27 +38,66 @@ namespace KindergardenStatistics.BL
             return kindergardens;
         }
 
-        public Child GetChild(int id)
+        /// <summary>
+        /// Prepare data from file for uploading to DB
+        /// </summary>
+        public void UploadDataFromFile(string fileName)
+        {
+            List<string> value;
+
+            foreach (string line in File.ReadAllLines(fileName).Skip(1))
+            {
+                value = line.Split(Separator, StringSplitOptions.None).ToList();
+                var kindergardenName = value[1];
+                var groupName = value[2];
+
+                var kindergarden = context.Kindergarden.FirstOrDefault(kg => kg.Name == kindergardenName)
+                    ?? repo.SaveKindergarden(kindergardenName);
+                var group = context.Group.FirstOrDefault(grp => grp.Name == groupName && grp.KindergardenId.Equals(kindergarden.Id))
+                    ?? repo.SaveGroup(kindergarden.Id, groupName);
+
+                if (Int64.TryParse(value[3], out long childId) && int.TryParse(value[4], out int registerInCity))
+                {
+                    if (context.Child.FirstOrDefault(cld => cld.Id == childId) == null)
+                    {
+                        repo.SaveChild(childId, group.Id, registerInCity);
+                        
+                        if (int.TryParse(value[5], out int sick)
+                            && int.TryParse(value[6], out int noReasons)
+                            && int.TryParse(value[7], out int otherReasons))
+                        {
+                            repo.SaveAttendance(childId, sick, noReasons, otherReasons);
+                        }
+                    }
+                }
+            }
+
+            context.SaveChanges();
+        }
+
+        public Child GetChild(long id)
         {
             var kindergardens = repo.GetKindergardens();
             var child = kindergardens
                 .SelectMany(kg => kg.Groups)
-                .SelectMany(grp => grp.Children)
-                .FirstOrDefault(cld => cld.Id == id);
+                .SelectMany(gcr => gcr.GroupChildRelation)
+                .Select(cld => cld.Child)
+                .FirstOrDefault(c => c.Id == id);
 
             return child;
         }
-
-        public string GetChildsKindergarden(int id)
+    
+        public string GetChildsKindergarden(long id)
         {
             var kindergardens = repo.GetKindergardens();
+
             foreach (var kg in kindergardens)
             {
                 foreach (var group in kg.Groups)
                 {
-                    foreach (var child in group.Children)
+                    foreach (var grc in group.GroupChildRelation)
                     {
-                        if (child.Id == id)
+                        if (grc.ChildId == id)
                         {
                             return kg.Name;
                         }
@@ -64,22 +110,25 @@ namespace KindergardenStatistics.BL
 
         public string GetMostSickGroup()
         {
-            var groups = repo.GetKindergardens().SelectMany(kg => kg.Groups);
+            var kindergardens = repo.GetKindergardens();
             var mostSickGroupName = string.Empty;
             int mostSick = 0;
 
-            foreach (var group in groups)
+            foreach (var kg in kindergardens)
             {
-                int sick = group.Children
-                    .SelectMany(cld => cld.Attendances)
-                    .Sum(att => att.Sick);
-                
-                if (sick > mostSick)
+                foreach (var group in kg.Groups)
                 {
-                    mostSick = sick;
-                    mostSickGroupName = group.Name;
+                    int sick = group.GroupChildRelation
+                        .SelectMany(grp => grp.Child.Attendance)
+                        .Sum(att => att.Sick);
+
+                    if (sick > mostSick)
+                    {
+                        mostSick = sick;
+                        mostSickGroupName = sick + " " + kg.Name + " " + group.Name;
+                    }
+                    sick = 0;
                 }
-                sick = 0;
             }
 
             return mostSickGroupName;
@@ -87,20 +136,24 @@ namespace KindergardenStatistics.BL
 
         public string GetHealthiestGroup()
         {
-            var groups = repo.GetKindergardens().SelectMany(kg => kg.Groups);
+            var kindergardens = repo.GetKindergardens();
             var healthiestGroupName = string.Empty;
             var leastSick = int.MaxValue;
 
-            foreach (var group in groups)
+            foreach (var kg in kindergardens)
             {
-                int sick = group.Children
-                    .SelectMany(cld => cld.Attendances)
-                    .Sum(att => att.Sick);
-
-                if (sick < leastSick)
+                foreach (var group in kg.Groups)
                 {
-                    leastSick = sick;
-                    healthiestGroupName = group.Name;
+                    int sick = group.GroupChildRelation
+                        .SelectMany(cld => cld.Child.Attendance)
+                        .Sum(att => att.Sick);
+
+                    if (sick < leastSick)
+                    {
+                        leastSick = sick;
+                        healthiestGroupName = sick + " " + kg.Name + " " + group.Name;
+                    }
+                    sick = 0;
                 }
             }
 
@@ -111,11 +164,11 @@ namespace KindergardenStatistics.BL
         {
             var kindergardens = repo.GetKindergardens();
             Dictionary<int, int> childrenAttendance = new Dictionary<int, int>();
-            
+
             childrenAttendance = kindergardens
                 .SelectMany(kg => kg.Groups)
-                .SelectMany(grp => grp.Children)
-                .SelectMany(cld => cld.Attendances)
+                .SelectMany(grp => grp.GroupChildRelation)
+                .SelectMany(cld => cld.Child.Attendance)
                 .Distinct()
                 .ToDictionary(att => att.Id, att => att.Sick);
 
@@ -126,17 +179,17 @@ namespace KindergardenStatistics.BL
         {
             var kindergardens = repo.GetKindergardens();
             Dictionary<string, int> kgAttendance = new Dictionary<string, int>();
-            
+
             foreach (var kg in kindergardens)
             {
                 int sick = kg.Groups
-                    .SelectMany(grp => grp.Children)
-                    .SelectMany(cld => cld.Attendances)
+                    .SelectMany(grp => grp.GroupChildRelation)
+                    .SelectMany(cld => cld.Child.Attendance)
                     .Sum(att => att.Sick);
 
                 if (!kgAttendance.ContainsKey(kg.Name))
                 {
-                     kgAttendance.Add(kg.Name, sick);
+                    kgAttendance.Add(kg.Name, sick);
                 }
             }
 
@@ -148,12 +201,12 @@ namespace KindergardenStatistics.BL
             var kindergardens = repo.GetKindergardens();
             var mostSickKgName = string.Empty;
             int mostSick = 0;
-            
+
             foreach (var kg in kindergardens)
             {
                 int sick = kg.Groups
-                    .SelectMany(grp => grp.Children)
-                    .SelectMany(cld => cld.Attendances)
+                    .SelectMany(grp => grp.GroupChildRelation)
+                    .SelectMany(cld => cld.Child.Attendance)
                     .Sum(att => att.Sick);
 
                 if (sick > mostSick)
@@ -161,6 +214,7 @@ namespace KindergardenStatistics.BL
                     mostSick = sick;
                     mostSickKgName = kg.Name;
                 }
+                sick = 0;
             }
 
             return mostSickKgName;
@@ -175,8 +229,8 @@ namespace KindergardenStatistics.BL
             foreach (var kg in kindergardens)
             {
                 int sick = kg.Groups
-                    .SelectMany(grp => grp.Children)
-                    .SelectMany(cld => cld.Attendances)
+                    .SelectMany(grp => grp.GroupChildRelation)
+                    .SelectMany(cld => cld.Child.Attendance)
                     .Sum(att => att.Sick);
 
                 if (sick < leastSick)
@@ -184,6 +238,7 @@ namespace KindergardenStatistics.BL
                     leastSick = sick;
                     healthiestKgName = kg.Name;
                 }
+                sick = 0;
             }
 
             return healthiestKgName;

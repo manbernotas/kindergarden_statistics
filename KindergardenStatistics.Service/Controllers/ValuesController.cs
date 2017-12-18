@@ -10,12 +10,16 @@ namespace KindergardenStatistics.Service.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly DAL.KindergardenContext _context;
+
         private KindergardenManager km;
 
-        public ValuesController()
+        public ValuesController(DAL.KindergardenContext context)
         {
-           km = new KindergardenManager();
+            _context = context;
+            km = new KindergardenManager(_context);
         }
+
         // GET api/values
         [HttpGet]
         public List<DAL.Kindergarden> Get()
@@ -41,29 +45,29 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Grazinti vaika pagal id
+        /// Returns child by Id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        public DAL.Child GetChild(int id)
+        public DAL.Child GetChild(long id)
         {
             return km.GetChild(id);
         }
 
         /// <summary>
-        /// Kuriam darzeli vaikas pagal vaiko id
+        /// Return kindergarden from child Id
         /// </summary>
-        /// <param name="id"></param>
+        /// <param ChildId="id"></param>
         /// <returns></returns>
         [HttpGet("{id}/kindergarden")]
-        public string GetChildsKindergarden(int id)
+        public string GetChildsKindergarden(long id)
         {
             return km.GetChildsKindergarden(id);
         }
 
         /// <summary>
-        /// Labiausiai serganti grupe
+        /// Most sick group
         /// </summary>
         /// <returns></returns>
         [HttpGet("most-sick-group")]
@@ -73,7 +77,17 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Sveikiausia grupe
+        /// Upload data from file
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("upload")]
+        public void UploadData()
+        {
+            km.UploadDataFromFile("D:\\test.csv");
+        }
+
+        /// <summary>
+        /// Healthiest group
         /// </summary>
         /// <returns></returns>
         [HttpGet("healthiest-group")]
@@ -83,7 +97,7 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Sveikiausias darzelis
+        /// Healthiest kindergarden
         /// </summary>
         /// <returns></returns>
         [HttpGet("healthiest-kg")]
@@ -93,7 +107,7 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Labiausiai sergantis darzelis
+        /// Most sick kindergarden
         /// </summary>
         /// <returns></returns>
         [HttpGet("most-sick-kg")]
@@ -103,7 +117,7 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Grazinti vaikus pagal ju lankomuma (nuo geriausio iki prasciausio)
+        /// Children id ordered by attendance
         /// </summary>
         /// <returns></returns>
         [HttpGet("top-attendance")]
@@ -113,7 +127,7 @@ namespace KindergardenStatistics.Service.Controllers
         }
 
         /// <summary>
-        /// Grazinti 2 geriausiai lankomus darzelius
+        /// Top two kindergarden names ordered by attendance
         /// </summary>
         [HttpGet("top-kg")]
         public List<string> GetTopTwoKgNamesOrderedByAttendance()
