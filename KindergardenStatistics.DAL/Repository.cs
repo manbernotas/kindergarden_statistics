@@ -33,7 +33,7 @@ namespace KindergardenStatistics.DAL
         /// <param name="groupId"></param>
         /// <param name="registerInCity"></param>
         /// <returns></returns>
-        public Child SaveChild(long childId, int groupId, int registerInCity)
+        public Child SaveChild(long childId, int groupId, bool registerInCity)
         {
             var child = context.Child.Add(new Child()
             {

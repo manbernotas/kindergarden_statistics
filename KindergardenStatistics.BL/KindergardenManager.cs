@@ -1,6 +1,7 @@
 ﻿using KindergardenStatistics.DAL;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -38,29 +39,59 @@ namespace KindergardenStatistics.BL
             return kindergardens;
         }
 
+        // TODO: Factory design pattern - read and see some examples
+        // 1) How are you using interfaces?
+        // 2) How to create Objects without passing params?
         /// <summary>
         /// Prepare data from file for uploading to DB
         /// </summary>
         public void UploadDataFromFile(string fileName)
         {
             List<string> value;
+            Dictionary<string, int> kindergardens = new Dictionary<string, int>();
 
+            Stopwatch stopwatch = new Stopwatch();
+
+            // Begin timing.
+            stopwatch.Start();
+
+            // TODO: Split reading and writing to database
+            // 1) Go through all kindergardens and save them to get their IDs
+            // 2) Manage all other data
             foreach (string line in File.ReadAllLines(fileName).Skip(1))
             {
                 value = line.Split(Separator, StringSplitOptions.None).ToList();
                 var kindergardenName = value[1];
+
+                if (!kindergardens.ContainsKey(kindergardenName))
+                {
+                    var kindergarden = repo.SaveKindergarden(kindergardenName);
+                    kindergardens.Add(kindergarden.Name, kindergarden.Id);
+                }
+                
+                var kindergardenId = kindergardens.First(x => x.Key == kindergardenName).Value;
+
                 var groupName = value[2];
 
-                var kindergarden = context.Kindergarden.FirstOrDefault(kg => kg.Name == kindergardenName)
-                    ?? repo.SaveKindergarden(kindergardenName);
-                var group = context.Group.FirstOrDefault(grp => grp.Name == groupName && grp.KindergardenId.Equals(kindergarden.Id))
-                    ?? repo.SaveGroup(kindergarden.Id, groupName);
+                var group = context.Group.FirstOrDefault(grp => grp.Name == groupName && grp.KindergardenId.Equals(kindergardenId))
+                    ?? repo.SaveGroup(kindergardenId, groupName);
 
-                if (Int64.TryParse(value[3], out long childId) && int.TryParse(value[4], out int registerInCity))
+                bool registeredInCity;
+
+                if (value[4] == "1")
                 {
-                    if (context.Child.FirstOrDefault(cld => cld.Id == childId) == null)
+                    registeredInCity = true;
+                }
+                else
+                {
+                    registeredInCity = false;
+                }
+
+                if (Int64.TryParse(value[3], out long childId))
+                {
+                    if (context.Child.Local.FirstOrDefault(cld => cld.Id == childId) == null && context.Child.FirstOrDefault(cld => cld.Id == childId) == null)
                     {
-                        repo.SaveChild(childId, group.Id, registerInCity);
+                        repo.SaveChild(childId, group.Id, registeredInCity);
                         
                         if (int.TryParse(value[5], out int sick)
                             && int.TryParse(value[6], out int noReasons)
@@ -73,6 +104,7 @@ namespace KindergardenStatistics.BL
             }
 
             context.SaveChanges();
+            stopwatch.Stop();
         }
 
         public Child GetChild(long id)

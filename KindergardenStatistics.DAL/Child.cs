@@ -9,8 +9,8 @@ namespace KindergardenStatistics.DAL
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long Id { get; set; }
-        //TODO change to bool
-        public int RegisteredInCity { get; set; }
+
+        public bool RegisteredInCity { get; set; }
 
         public List<GroupChild> GroupChildRelation { get; set; }
 

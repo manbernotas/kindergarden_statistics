@@ -3,6 +3,10 @@
 //using System;
 //using System.Collections.Generic;
 
+
+// TODO: How to use Entity Framework InMemory database to test!
+// TODO: (later) Moq library
+
 //namespace KindergardenStatistics.BL.Tests
 //{
 //    [TestClass]
