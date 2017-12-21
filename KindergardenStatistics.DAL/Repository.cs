@@ -33,46 +33,35 @@ namespace KindergardenStatistics.DAL
         /// <param name="groupId"></param>
         /// <param name="registerInCity"></param>
         /// <returns></returns>
-        public Child SaveChild(long childId, int groupId, bool registerInCity)
+        public void SaveChild(List<Child> child)
         {
-            var child = context.Child.Add(new Child()
-            {
-                Id = childId,
-                RegisteredInCity = registerInCity,
-            });
+            context.Child.AddRange(child);
+            //var child = context.Child.Add(new Child()
+            //{
+            //    Id = childId,
+            //    RegisteredInCity = registerInCity,
+            //});
 
-            context.GroupChild.Add(new GroupChild()
-            {
-                ChildId = childId,
-                GroupId = groupId,
-                Started = DateTime.Today,
-                Current = true,
-            });
+            //context.GroupChild.Add(new GroupChild()
+            //{
+            //    ChildId = childId,
+            //    GroupId = groupId,
+            //    Started = DateTime.Today,
+            //    Current = true,
+            //});
 
             //context.SaveChanges();
 
-            return child.Entity;
+            //return child.Entity;
+        }
+        public void SaveGroupChild(List<GroupChild> groupChild)
+        {
+            context.GroupChild.AddRange(groupChild);
         }
 
-        /// <summary>
-        /// Save child attendance data in the DB
-        /// </summary>
-        /// <param name="childId"></param>
-        /// <param name="sick"></param>
-        /// <param name="noReasons"></param>
-        /// <param name="otherReasons"></param>
-        public void SaveAttendance(long childId, int sick, int noReasons, int otherReasons)
-        { 
-            context.Attendance.Add(new Attendance()
-            {
-                ChildId = childId,
-                Date = DateTime.Today,
-                Sick = sick,
-                NoReasons = noReasons,
-                OtherReasons = otherReasons,
-            });
-
-            //context.SaveChanges();
+        public void SaveAttendance(List<Attendance> attendance)
+        {
+            context.Attendance.AddRange(attendance);
         }
 
         /// <summary>
@@ -80,16 +69,22 @@ namespace KindergardenStatistics.DAL
         /// </summary>
         /// <param name="kgName"></param>
         /// <returns></returns>
-        public Kindergarden SaveKindergarden(string kgName)
+        public void SaveKindergarden(List<Kindergarden> kindergardens)
         {
-            var kindergarden = context.Kindergarden.Add(new Kindergarden()
-            {
-                Name = kgName,
-            });
-
+            // TODO: Create a helper method to convert List<string> to List<Kindergarden>
+            // and then use context.Kindergarden.AddRange method
+            //foreach (var kgName in kgNames)
+            //{
+            context.Kindergarden.AddRange(kindergardens);
+            //      new Kindergarden()
+            //    {
+            //        Name = kgName,
+            //    });
+            //}
+            
             context.SaveChanges();
 
-            return kindergarden.Entity;
+            //return kindergarden.Entity;
         }
 
         /// <summary>
@@ -98,17 +93,22 @@ namespace KindergardenStatistics.DAL
         /// <param name="kindergardenId"></param>
         /// <param name="groupName"></param>
         /// <returns></returns>
-        public Group SaveGroup(int kindergardenId, string groupName)
+        //public Group SaveGroup(int kindergardenId, string groupName)
+        public void SaveGroup(List<Group> groups)
         {
-            var group = context.Group.Add(new Group()
-            {
-                KindergardenId = kindergardenId,
-                Name = groupName,
-            });
+            context.Group.AddRange(groups);
+            //foreach (var group in groups)
+            //{
+            //    context.Group.Add(new Group()
+            //    {
+            //        KindergardenId = group.Value,
+            //        Name = group.Key,
+            //    });
+            //}
 
-            //context.SaveChanges();
+            context.SaveChanges();
 
-            return group.Entity;
+            //return group.Entity;
         }
     }
 }

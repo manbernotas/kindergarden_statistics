@@ -13,7 +13,6 @@ namespace KindergardenStatistics.BL
         private KindergardenContext context;
 
         private Repository repo;
-
         static readonly string Separator = ";";
 
         public KindergardenManager(KindergardenContext context)
@@ -39,6 +38,46 @@ namespace KindergardenStatistics.BL
             return kindergardens;
         }
 
+        public KindergardenData ConvertData(string[] data)
+        {
+            List<string> value;
+            var kindergardensData = new KindergardenData();
+
+            value = data.First().Split(Separator, StringSplitOptions.None).ToList();
+
+            if (value[1] == "KindergardenName" && value[2] == "GroupName" && value[3] == "ChildId"
+                && value[4] == "RegisteredInCity" && value[5] == "Sick" && value[6] == "OtherReasons" && value[7] == "NoReasons")
+            {
+                foreach (var line in data.Skip(1))
+                {
+                    value = line.Split(Separator, StringSplitOptions.None).ToList();
+
+                    kindergardensData.Kindergardens.Add(new Kindergarden()
+                    {
+                        Name = value[1],
+                    });
+                    kindergardensData.GroupNames.Add(new Group()
+                    {
+                        Name = value[2],
+                    });
+
+                    if (Int64.TryParse(value[3], out long childId))
+                    {
+                        kindergardensData.Children.Add(new Child()
+                        {
+                            Id = childId,
+                            RegisteredInCity = Convert.ToBoolean(Convert.ToInt16(value[4])),
+                        });
+                    }
+
+                    kindergardensData.SickList.Add(value[5]);
+                    kindergardensData.OtherReasonList.Add(value[6]);
+                    kindergardensData.NoReasonList.Add(value[7]);
+                }
+            }
+            return kindergardensData;
+        }
+
         // TODO: Factory design pattern - read and see some examples
         // 1) How are you using interfaces?
         // 2) How to create Objects without passing params?
@@ -47,64 +86,94 @@ namespace KindergardenStatistics.BL
         /// </summary>
         public void UploadDataFromFile(string fileName)
         {
-            List<string> value;
-            Dictionary<string, int> kindergardens = new Dictionary<string, int>();
-
             Stopwatch stopwatch = new Stopwatch();
 
             // Begin timing.
             stopwatch.Start();
 
-            // TODO: Split reading and writing to database
-            // 1) Go through all kindergardens and save them to get their IDs
-            // 2) Manage all other data
-            foreach (string line in File.ReadAllLines(fileName).Skip(1))
+            var fileManager = new FileManager();
+            var rawData = fileManager.ReadFile(fileName);
+            var kindergardensData = ConvertData(rawData);
+
+            foreach (var kgName in kindergardensData.Kindergardens)
             {
-                value = line.Split(Separator, StringSplitOptions.None).ToList();
-                var kindergardenName = value[1];
-
-                if (!kindergardens.ContainsKey(kindergardenName))
+                if (kindergardensData.UniqueKindergardens.FirstOrDefault(x => x.Name == kgName.Name) == null)
                 {
-                    var kindergarden = repo.SaveKindergarden(kindergardenName);
-                    kindergardens.Add(kindergarden.Name, kindergarden.Id);
-                }
-                
-                var kindergardenId = kindergardens.First(x => x.Key == kindergardenName).Value;
-
-                var groupName = value[2];
-
-                var group = context.Group.FirstOrDefault(grp => grp.Name == groupName && grp.KindergardenId.Equals(kindergardenId))
-                    ?? repo.SaveGroup(kindergardenId, groupName);
-
-                bool registeredInCity;
-
-                if (value[4] == "1")
-                {
-                    registeredInCity = true;
-                }
-                else
-                {
-                    registeredInCity = false;
-                }
-
-                if (Int64.TryParse(value[3], out long childId))
-                {
-                    if (context.Child.Local.FirstOrDefault(cld => cld.Id == childId) == null && context.Child.FirstOrDefault(cld => cld.Id == childId) == null)
+                    kindergardensData.UniqueKindergardens.Add(new Kindergarden()
                     {
-                        repo.SaveChild(childId, group.Id, registeredInCity);
-                        
-                        if (int.TryParse(value[5], out int sick)
-                            && int.TryParse(value[6], out int noReasons)
-                            && int.TryParse(value[7], out int otherReasons))
+                        Name = kgName.Name,
+                    });
+                }
+            }
+
+            repo.SaveKindergarden(kindergardensData.UniqueKindergardens);
+
+            for (int i = 0; i < kindergardensData.GroupNames.Count; i++)
+            {
+                var groupName = kindergardensData.GroupNames[i].Name;
+                if (kindergardensData.UniqueGroups.FirstOrDefault(x => x.Name == groupName) == null)
+                {
+                    var kindergardenId = context.Kindergarden.First(k => k.Name == kindergardensData.Kindergardens[i].Name).Id;
+                    kindergardensData.UniqueGroups.Add(new Group()
+                    {
+                        Name = groupName,
+                        KindergardenId = kindergardenId,
+                    });
+                }
+            }
+
+            repo.SaveGroup(kindergardensData.UniqueGroups);
+
+            for (int j = 0; j < kindergardensData.Children.Count; j++)
+            {
+                if (kindergardensData.UniqueChildren.FirstOrDefault(x => x.Id == kindergardensData.Children[j].Id) == null)
+                {
+                    kindergardensData.UniqueChildren.Add(new Child()
+                    {
+                        Id = kindergardensData.Children[j].Id,
+                        RegisteredInCity = kindergardensData.Children[j].RegisteredInCity,
+                    });
+
+                    var groupId = kindergardensData.UniqueGroups.First(x => x.Name == kindergardensData.GroupNames[j].Name).Id;
+
+                    kindergardensData.GroupChild.Add(new GroupChild()
+                    {
+                        ChildId = kindergardensData.Children[j].Id,
+                        GroupId = groupId,
+                        Current = true,
+                        Started = DateTime.Today,
+                    });
+
+                    if (int.TryParse(kindergardensData.SickList[j], out int sick)
+                        && int.TryParse(kindergardensData.OtherReasonList[j], out int otherReasons)
+                        && int.TryParse(kindergardensData.NoReasonList[j], out int noReasons))
+                    {
+                        kindergardensData.Attendance.Add(new Attendance()
                         {
-                            repo.SaveAttendance(childId, sick, noReasons, otherReasons);
-                        }
+                            ChildId = kindergardensData.Children[j].Id,
+                            Date = DateTime.Today,
+                            NoReasons = noReasons,
+                            OtherReasons = otherReasons,
+                            Sick = sick,
+                        });
                     }
                 }
             }
 
+            repo.SaveChild(kindergardensData.UniqueChildren);
+            repo.SaveGroupChild(kindergardensData.GroupChild);
+            repo.SaveAttendance(kindergardensData.Attendance);
+
+            //    // TODO: task in trello "Extension method for DBContext"
+            //    if (j > 0 && j % 3000 == 0)
+            //    {
+            //        //context.BulkSaveChanges(???)
+            //        context.SaveChanges();
+            //    }
+
+
             context.SaveChanges();
-            stopwatch.Stop();
+            stopwatch.Stop(); 
         }
 
         public Child GetChild(long id)
