@@ -7,9 +7,14 @@ using System.Text;
 
 namespace KindergardenStatistics.BL
 {
-    public class FileManager
+    public class FileManager : IDataManager
     {
-        public String[] ReadFile(string fileName)
+        /// <summary>
+        /// Put all lines of the file to array of strings
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public string[] GetData(string fileName)
         {
             var data = File.ReadAllLines(fileName);
 

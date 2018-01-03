@@ -7,7 +7,6 @@ using System.Linq;
 
 namespace KindergardenStatistics.BL
 {
-
     public class KindergardenManager
     {
         private KindergardenContext context;
@@ -26,11 +25,10 @@ namespace KindergardenStatistics.BL
             this.repo = repo;
         }
 
-        public string GetName()
-        {
-            return "name";
-        }
-
+        /// <summary>
+        /// Return list of kindergardens
+        /// </summary>
+        /// <returns></returns>
         public List<Kindergarden> GetKindergardens()
         {
             var kindergardens = repo.GetKindergardens();
@@ -38,15 +36,20 @@ namespace KindergardenStatistics.BL
             return kindergardens;
         }
 
+        // TODO: Add unit test here (One success and one failing)
+
+        /// <summary>
+        /// Converts array of strings data to KindergardenData
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public KindergardenData ConvertData(string[] data)
         {
             List<string> value;
             var kindergardensData = new KindergardenData();
 
-            value = data.First().Split(Separator, StringSplitOptions.None).ToList();
-
-            if (value[1] == "KindergardenName" && value[2] == "GroupName" && value[3] == "ChildId"
-                && value[4] == "RegisteredInCity" && value[5] == "Sick" && value[6] == "OtherReasons" && value[7] == "NoReasons")
+            if ((data != null || data.Length != 0) 
+                && data.First() == "Nr;KindergardenName;GroupName;ChildId;RegisteredInCity;Sick;OtherReasons;NoReasons;SpareDays")
             {
                 foreach (var line in data.Skip(1))
                 {
@@ -66,23 +69,30 @@ namespace KindergardenStatistics.BL
                         kindergardensData.Children.Add(new Child()
                         {
                             Id = childId,
-                            RegisteredInCity = Convert.ToBoolean(Convert.ToInt16(value[4])),
+                            RegisteredInCity = Convert.ToBoolean(Convert.ToByte(value[4])),
                         });
-                    }
 
-                    kindergardensData.SickList.Add(value[5]);
-                    kindergardensData.OtherReasonList.Add(value[6]);
-                    kindergardensData.NoReasonList.Add(value[7]);
+                        if (int.TryParse(value[5], out int sick)
+                        && int.TryParse(value[6], out int otherReasons)
+                        && int.TryParse(value[7], out int noReasons))
+                        {
+                            kindergardensData.SickList.Add(sick);
+                            kindergardensData.OtherReasonList.Add(otherReasons);
+                            kindergardensData.NoReasonList.Add(noReasons);
+                        }
+                    }
                 }
             }
+
             return kindergardensData;
         }
 
         // TODO: Factory design pattern - read and see some examples
         // 1) How are you using interfaces?
         // 2) How to create Objects without passing params?
+        
         /// <summary>
-        /// Prepare data from file for uploading to DB
+        /// Prepare data for uploading to DB
         /// </summary>
         public void UploadDataFromFile(string fileName)
         {
@@ -92,28 +102,33 @@ namespace KindergardenStatistics.BL
             stopwatch.Start();
 
             var fileManager = new FileManager();
-            var rawData = fileManager.ReadFile(fileName);
-            var kindergardensData = ConvertData(rawData);
+            var kindergardensData = ConvertData(fileManager.GetData(fileName));
 
-            foreach (var kgName in kindergardensData.Kindergardens)
+            foreach (var kg in kindergardensData.Kindergardens)
             {
-                if (kindergardensData.UniqueKindergardens.FirstOrDefault(x => x.Name == kgName.Name) == null)
+                // TODO: We want unique values why not use a Collection with UNIQUE values?
+                // There is https://msdn.microsoft.com/en-us/library/bb359438.aspx
+                // However - it's for primitive types only, you need to implement specific Interface for it to be able to
+                // distinguish unique objects
+                if (kindergardensData.UniqueKindergardens.FirstOrDefault(x => x.Name == kg.Name) == null)
                 {
                     kindergardensData.UniqueKindergardens.Add(new Kindergarden()
                     {
-                        Name = kgName.Name,
+                        Name = kg.Name,
                     });
                 }
             }
 
-            repo.SaveKindergarden(kindergardensData.UniqueKindergardens);
+            var kindergardens = repo.SaveKindergarden(kindergardensData.UniqueKindergardens);
 
             for (int i = 0; i < kindergardensData.GroupNames.Count; i++)
             {
                 var groupName = kindergardensData.GroupNames[i].Name;
-                if (kindergardensData.UniqueGroups.FirstOrDefault(x => x.Name == groupName) == null)
+                var kindergardenId = kindergardens.First(kg => kg.Name == kindergardensData.Kindergardens[i].Name).Id;
+
+                if (kindergardensData.UniqueGroups.FirstOrDefault(x => x.Name == groupName 
+                    && x.KindergardenId == kindergardenId) == null)
                 {
-                    var kindergardenId = context.Kindergarden.First(k => k.Name == kindergardensData.Kindergardens[i].Name).Id;
                     kindergardensData.UniqueGroups.Add(new Group()
                     {
                         Name = groupName,
@@ -128,54 +143,54 @@ namespace KindergardenStatistics.BL
             {
                 if (kindergardensData.UniqueChildren.FirstOrDefault(x => x.Id == kindergardensData.Children[j].Id) == null)
                 {
+                    var groupName = kindergardensData.GroupNames[j].Name;
+                    var kindergardenId = kindergardens.First(kg => kg.Name == kindergardensData.Kindergardens[j].Name).Id;
+                    var groupId = kindergardensData.UniqueGroups.First(x => x.Name == groupName
+                        && x.KindergardenId == kindergardenId).Id;
+                    var childId = kindergardensData.Children[j].Id;
+
                     kindergardensData.UniqueChildren.Add(new Child()
                     {
-                        Id = kindergardensData.Children[j].Id,
+                        Id = childId,
                         RegisteredInCity = kindergardensData.Children[j].RegisteredInCity,
                     });
 
-                    var groupId = kindergardensData.UniqueGroups.First(x => x.Name == kindergardensData.GroupNames[j].Name).Id;
-
                     kindergardensData.GroupChild.Add(new GroupChild()
                     {
-                        ChildId = kindergardensData.Children[j].Id,
+                        ChildId = childId,
                         GroupId = groupId,
                         Current = true,
                         Started = DateTime.Today,
                     });
 
-                    if (int.TryParse(kindergardensData.SickList[j], out int sick)
-                        && int.TryParse(kindergardensData.OtherReasonList[j], out int otherReasons)
-                        && int.TryParse(kindergardensData.NoReasonList[j], out int noReasons))
+                    int sick = kindergardensData.SickList[j];
+                    int otherReasons = kindergardensData.OtherReasonList[j];
+                    int noReasons = kindergardensData.NoReasonList[j];
+                    
+                    kindergardensData.Attendance.Add(new Attendance()
                     {
-                        kindergardensData.Attendance.Add(new Attendance()
-                        {
-                            ChildId = kindergardensData.Children[j].Id,
-                            Date = DateTime.Today,
-                            NoReasons = noReasons,
-                            OtherReasons = otherReasons,
-                            Sick = sick,
-                        });
-                    }
+                        ChildId = childId,
+                        Date = DateTime.Today,
+                        NoReasons = noReasons,
+                        OtherReasons = otherReasons,
+                        Sick = sick,
+                    });
                 }
             }
 
-            repo.SaveChild(kindergardensData.UniqueChildren);
-            repo.SaveGroupChild(kindergardensData.GroupChild);
-            repo.SaveAttendance(kindergardensData.Attendance);
-
-            //    // TODO: task in trello "Extension method for DBContext"
-            //    if (j > 0 && j % 3000 == 0)
-            //    {
-            //        //context.BulkSaveChanges(???)
-            //        context.SaveChanges();
-            //    }
-
+            repo.AttachChild(kindergardensData.UniqueChildren);
+            repo.AttachGroupChild(kindergardensData.GroupChild);
+            repo.AttachAttendance(kindergardensData.Attendance);
 
             context.SaveChanges();
             stopwatch.Stop(); 
         }
 
+        /// <summary>
+        /// Returns child by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public Child GetChild(long id)
         {
             var kindergardens = repo.GetKindergardens();
@@ -187,7 +202,12 @@ namespace KindergardenStatistics.BL
 
             return child;
         }
-    
+        
+        /// <summary>
+        /// Returns child kindergarden by child Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public string GetChildsKindergarden(long id)
         {
             var kindergardens = repo.GetKindergardens();
@@ -209,6 +229,10 @@ namespace KindergardenStatistics.BL
             return null;
         }
 
+        /// <summary>
+        /// Returns most sick group
+        /// </summary>
+        /// <returns></returns>
         public string GetMostSickGroup()
         {
             var kindergardens = repo.GetKindergardens();
@@ -235,6 +259,10 @@ namespace KindergardenStatistics.BL
             return mostSickGroupName;
         }
 
+        /// <summary>
+        /// Returns healthiest group
+        /// </summary>
+        /// <returns></returns>
         public string GetHealthiestGroup()
         {
             var kindergardens = repo.GetKindergardens();
@@ -261,6 +289,10 @@ namespace KindergardenStatistics.BL
             return healthiestGroupName;
         }
 
+        /// <summary>
+        /// Returns children Ids order by children attendance
+        /// </summary>
+        /// <returns></returns>
         public List<int> GetChildrenIdOrderedByAttendance()
         {
             var kindergardens = repo.GetKindergardens();
@@ -276,6 +308,10 @@ namespace KindergardenStatistics.BL
             return childrenAttendance.OrderBy(x => x.Value).Select(x => x.Key).ToList();
         }
 
+        /// <summary>
+        /// Returns top two kindergardens ordered by children attendance
+        /// </summary>
+        /// <returns></returns>
         public List<string> GetTopTwoKgNamesOrderedByAttendance()
         {
             var kindergardens = repo.GetKindergardens();
@@ -297,6 +333,10 @@ namespace KindergardenStatistics.BL
             return kgAttendance.OrderBy(x => x.Value).Select(x => x.Key).Take(2).ToList();
         }
 
+        /// <summary>
+        /// Returns most sick group
+        /// </summary>
+        /// <returns></returns>
         public string GetMostSickKg()
         {
             var kindergardens = repo.GetKindergardens();
@@ -321,6 +361,10 @@ namespace KindergardenStatistics.BL
             return mostSickKgName;
         }
 
+        /// <summary>
+        /// Returns healthiest group
+        /// </summary>
+        /// <returns></returns>
         public string GetHealthiestKg()
         {
             var kindergardens = repo.GetKindergardens();

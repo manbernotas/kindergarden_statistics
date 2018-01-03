@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using KindergardenStatistics.BL;
 
@@ -12,33 +10,37 @@ namespace KindergardenStatistics.Service.Controllers
     {
         private readonly DAL.KindergardenContext _context;
 
-        private KindergardenManager km;
+        private KindergardenManager kindergardenManager;
 
         public ValuesController(DAL.KindergardenContext context)
         {
             _context = context;
-            km = new KindergardenManager(_context);
+            kindergardenManager = new KindergardenManager(_context);
         }
 
         // GET api/values
         [HttpGet]
         public List<DAL.Kindergarden> Get()
         {
-            var kindergardens = km.GetKindergardens();
+            var kindergardens = kindergardenManager.GetKindergardens();
 
             return kindergardens;
         }
 
+        /// <summary>
+        /// Returns all kindergardens
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("names")]
         public List<String> GetAllKindergardenNames()
         {
-            var kindergardens = km.GetKindergardens();
+            var kindergardens = kindergardenManager.GetKindergardens();
             var kgNames = new List<String>();
 
-            foreach (var kg in kindergardens)
+            foreach (var kindergarden in kindergardens)
             {
-                kgNames.Add(kg.Name);
+                kgNames.Add(kindergarden.Name);
             }
             
             return kgNames;
@@ -52,7 +54,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("{id}")]
         public DAL.Child GetChild(long id)
         {
-            return km.GetChild(id);
+            return kindergardenManager.GetChild(id);
         }
 
         /// <summary>
@@ -61,9 +63,9 @@ namespace KindergardenStatistics.Service.Controllers
         /// <param ChildId="id"></param>
         /// <returns></returns>
         [HttpGet("{id}/kindergarden")]
-        public string GetChildsKindergarden(long id)
+        public string GetChildsKindergarden(long childId)
         {
-            return km.GetChildsKindergarden(id);
+            return kindergardenManager.GetChildsKindergarden(childId);
         }
 
         /// <summary>
@@ -73,7 +75,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("most-sick-group")]
         public string GetMostSickGroup()
         {
-            return km.GetMostSickGroup();
+            return kindergardenManager.GetMostSickGroup();
         }
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("upload")]
         public void UploadData()
         {
-            km.UploadDataFromFile("D:\\test.csv");
+            kindergardenManager.UploadDataFromFile("D:\\test.csv");
         }
 
         /// <summary>
@@ -93,7 +95,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("healthiest-group")]
         public string GetHealthiestGroup()
         {
-            return km.GetHealthiestGroup();
+            return kindergardenManager.GetHealthiestGroup();
         }
 
         /// <summary>
@@ -103,7 +105,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("healthiest-kg")]
         public string GetHealthiestKg()
         {
-            return km.GetHealthiestKg();
+            return kindergardenManager.GetHealthiestKg();
         }
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("most-sick-kg")]
         public string GetMostSickKg()
         {
-            return km.GetMostSickKg();
+            return kindergardenManager.GetMostSickKg();
         }
 
         /// <summary>
@@ -123,7 +125,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("top-attendance")]
         public List<int> GetTopAttendance()
         {
-            return km.GetChildrenIdOrderedByAttendance();
+            return kindergardenManager.GetChildrenIdOrderedByAttendance();
         }
 
         /// <summary>
@@ -132,7 +134,7 @@ namespace KindergardenStatistics.Service.Controllers
         [HttpGet("top-kg")]
         public List<string> GetTopTwoKgNamesOrderedByAttendance()
         {
-            return km.GetTopTwoKgNamesOrderedByAttendance();
+            return kindergardenManager.GetTopTwoKgNamesOrderedByAttendance();
         }
 
         // POST api/values

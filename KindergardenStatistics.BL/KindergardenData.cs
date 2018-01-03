@@ -17,8 +17,8 @@ namespace KindergardenStatistics.BL
         public List<Child> UniqueChildren { get; set; } = new List<Child>();
         public List<GroupChild> GroupChild { get; set; } = new List<GroupChild>();
         public List<Attendance> Attendance { get; set; } = new List<Attendance>();
-        public List<string> SickList { get; set; } = new List<string>();
-        public List<string> OtherReasonList { get; set; } = new List<string>();
-        public List<string> NoReasonList { get; set; } = new List<string>();
+        public List<int> SickList { get; set; } = new List<int>();
+        public List<int> OtherReasonList { get; set; } = new List<int>();
+        public List<int> NoReasonList { get; set; } = new List<int>();
     }
 }
