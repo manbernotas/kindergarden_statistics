@@ -58,7 +58,7 @@ namespace KindergardenStatistics.DAL
         /// </summary>
         /// <param name="kindergardens"></param>
         /// <returns></returns>
-        public List<Kindergarden> SaveKindergarden(List<Kindergarden> kindergardens)
+        public List<Kindergarden> SaveKindergarden(HashSet<Kindergarden> kindergardens)
         {
             context.Kindergarden.AddRange(kindergardens);
             context.SaveChanges();

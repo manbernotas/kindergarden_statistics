@@ -9,6 +9,7 @@ namespace KindergardenStatistics.BL
 {
     public class FileManager : IDataManager
     {
+        public string Filename { get; set; } = "name";
         /// <summary>
         /// Put all lines of the file to array of strings
         /// </summary>

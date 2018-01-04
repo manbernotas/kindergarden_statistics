@@ -23,7 +23,7 @@ namespace KindergardenStatistics.Service
                 try
                 {
                     var context = services.GetRequiredService<DAL.KindergardenContext>();
-                    context.Database.EnsureDeleted();
+                    //context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
 
                     context.SaveChanges();

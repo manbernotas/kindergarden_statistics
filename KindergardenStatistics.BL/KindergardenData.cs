@@ -10,7 +10,7 @@ namespace KindergardenStatistics.BL
         public KindergardenData() {}
 
         public List<Kindergarden> Kindergardens { get; set; } = new List<Kindergarden>();
-        public List<Kindergarden> UniqueKindergardens { get; set; } = new List<Kindergarden>();
+        public HashSet<Kindergarden> UniqueKindergardens { get; set; } = new HashSet<Kindergarden>(new KindergardenComparer());
         public List<Group> GroupNames { get; set; } = new List<Group>();
         public List<Group> UniqueGroups { get; set; } = new List<Group>();
         public List<Child> Children { get; set; } = new List<Child>();
@@ -20,5 +20,18 @@ namespace KindergardenStatistics.BL
         public List<int> SickList { get; set; } = new List<int>();
         public List<int> OtherReasonList { get; set; } = new List<int>();
         public List<int> NoReasonList { get; set; } = new List<int>();
+    }
+
+    public class KindergardenComparer : IEqualityComparer<Kindergarden>
+    {
+        public bool Equals(Kindergarden x, Kindergarden y)
+        {
+            return x.Name.Equals(y.Name);
+        }
+
+        public int GetHashCode(Kindergarden obj)
+        {
+            return obj.Name.GetHashCode();
+        }
     }
 }

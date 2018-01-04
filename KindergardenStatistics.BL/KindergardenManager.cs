@@ -36,8 +36,6 @@ namespace KindergardenStatistics.BL
             return kindergardens;
         }
 
-        // TODO: Add unit test here (One success and one failing)
-
         /// <summary>
         /// Converts array of strings data to KindergardenData
         /// </summary>
@@ -106,17 +104,10 @@ namespace KindergardenStatistics.BL
 
             foreach (var kg in kindergardensData.Kindergardens)
             {
-                // TODO: We want unique values why not use a Collection with UNIQUE values?
-                // There is https://msdn.microsoft.com/en-us/library/bb359438.aspx
-                // However - it's for primitive types only, you need to implement specific Interface for it to be able to
-                // distinguish unique objects
-                if (kindergardensData.UniqueKindergardens.FirstOrDefault(x => x.Name == kg.Name) == null)
+                kindergardensData.UniqueKindergardens.Add(new Kindergarden()
                 {
-                    kindergardensData.UniqueKindergardens.Add(new Kindergarden()
-                    {
-                        Name = kg.Name,
-                    });
-                }
+                    Name = kg.Name,
+                });
             }
 
             var kindergardens = repo.SaveKindergarden(kindergardensData.UniqueKindergardens);
