@@ -21,17 +21,4 @@ namespace KindergardenStatistics.BL
         public List<int> OtherReasonList { get; set; } = new List<int>();
         public List<int> NoReasonList { get; set; } = new List<int>();
     }
-
-    public class KindergardenComparer : IEqualityComparer<Kindergarden>
-    {
-        public bool Equals(Kindergarden x, Kindergarden y)
-        {
-            return x.Name.Equals(y.Name);
-        }
-
-        public int GetHashCode(Kindergarden obj)
-        {
-            return obj.Name.GetHashCode();
-        }
-    }
 }

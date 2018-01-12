@@ -1,8 +1,8 @@
 ﻿using KindergardenStatistics.DAL;
+using KindergardenStatistics.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace KindergardenStatistics.BL
@@ -11,18 +11,20 @@ namespace KindergardenStatistics.BL
     {
         private KindergardenContext context;
 
-        private Repository repo;
+        private IRepository repository;
         static readonly string Separator = ";";
 
         public KindergardenManager(KindergardenContext context)
         {
-            repo = new Repository(context);
+            var repositoryFactory = new RepositoryFactory();
+            repository = repositoryFactory.GetRepository(context);
+            
             this.context = context;
         }
 
         public KindergardenManager(KindergardenContext context, Repository repo)
         {
-            this.repo = repo;
+            repository = repo;
         }
 
         /// <summary>
@@ -31,9 +33,28 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public List<Kindergarden> GetKindergardens()
         {
-            var kindergardens = repo.GetKindergardens();
-
+            var sw = new Stopwatch();
+            sw.Start();
+            var kindergardens = repository.GetKindergardens();
+            sw.Stop();
             return kindergardens;
+        }
+
+        /// <summary>
+        /// Return RequestData with kindergardens ordered by children count
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public RequestData GetKindergardensOrderedByChildrenCount(RequestData data)
+        {
+            var sortedKindergardens = data.KindergardenChildren.OrderByDescending(x => x.ChildrenCount).Take(5).ToList();
+
+            var result = new RequestData
+            {
+                KindergardenChildren = sortedKindergardens
+            };
+
+            return result;
         }
 
         /// <summary>
@@ -53,30 +74,33 @@ namespace KindergardenStatistics.BL
                 {
                     value = line.Split(Separator, StringSplitOptions.None).ToList();
 
-                    kindergardensData.Kindergardens.Add(new Kindergarden()
+                    if (value.Count() == 9)
                     {
-                        Name = value[1],
-                    });
-                    kindergardensData.GroupNames.Add(new Group()
-                    {
-                        Name = value[2],
-                    });
-
-                    if (Int64.TryParse(value[3], out long childId))
-                    {
-                        kindergardensData.Children.Add(new Child()
+                        kindergardensData.Kindergardens.Add(new Kindergarden()
                         {
-                            Id = childId,
-                            RegisteredInCity = Convert.ToBoolean(Convert.ToByte(value[4])),
+                            Name = value[1],
+                        });
+                        kindergardensData.GroupNames.Add(new Group()
+                        {
+                            Name = value[2],
                         });
 
-                        if (int.TryParse(value[5], out int sick)
-                        && int.TryParse(value[6], out int otherReasons)
-                        && int.TryParse(value[7], out int noReasons))
+                        if (Int64.TryParse(value[3], out long childId))
                         {
-                            kindergardensData.SickList.Add(sick);
-                            kindergardensData.OtherReasonList.Add(otherReasons);
-                            kindergardensData.NoReasonList.Add(noReasons);
+                            kindergardensData.Children.Add(new Child()
+                            {
+                                Id = childId,
+                                RegisteredInCity = Convert.ToBoolean(Convert.ToByte(value[4])),
+                            });
+
+                            if (int.TryParse(value[5], out int sick)
+                            && int.TryParse(value[6], out int otherReasons)
+                            && int.TryParse(value[7], out int noReasons))
+                            {
+                                kindergardensData.SickList.Add(sick);
+                                kindergardensData.OtherReasonList.Add(otherReasons);
+                                kindergardensData.NoReasonList.Add(noReasons);
+                            }
                         }
                     }
                 }
@@ -85,22 +109,12 @@ namespace KindergardenStatistics.BL
             return kindergardensData;
         }
 
-        // TODO: Factory design pattern - read and see some examples
-        // 1) How are you using interfaces?
-        // 2) How to create Objects without passing params?
-        
         /// <summary>
         /// Prepare data for uploading to DB
         /// </summary>
-        public void UploadDataFromFile(string fileName)
+        public void UploadData(string[] data)
         {
-            Stopwatch stopwatch = new Stopwatch();
-
-            // Begin timing.
-            stopwatch.Start();
-
-            var fileManager = new FileManager();
-            var kindergardensData = ConvertData(fileManager.GetData(fileName));
+            var kindergardensData = ConvertData(data);
 
             foreach (var kg in kindergardensData.Kindergardens)
             {
@@ -109,8 +123,7 @@ namespace KindergardenStatistics.BL
                     Name = kg.Name,
                 });
             }
-
-            var kindergardens = repo.SaveKindergarden(kindergardensData.UniqueKindergardens);
+            var kindergardens = repository.SaveKindergarden(kindergardensData.UniqueKindergardens);
 
             for (int i = 0; i < kindergardensData.GroupNames.Count; i++)
             {
@@ -128,7 +141,7 @@ namespace KindergardenStatistics.BL
                 }
             }
 
-            repo.SaveGroup(kindergardensData.UniqueGroups);
+            repository.SaveGroup(kindergardensData.UniqueGroups);
 
             for (int j = 0; j < kindergardensData.Children.Count; j++)
             {
@@ -169,12 +182,11 @@ namespace KindergardenStatistics.BL
                 }
             }
 
-            repo.AttachChild(kindergardensData.UniqueChildren);
-            repo.AttachGroupChild(kindergardensData.GroupChild);
-            repo.AttachAttendance(kindergardensData.Attendance);
+            repository.AttachChild(kindergardensData.UniqueChildren);
+            repository.AttachGroupChild(kindergardensData.GroupChild);
+            repository.AttachAttendance(kindergardensData.Attendance);
 
             context.SaveChanges();
-            stopwatch.Stop(); 
         }
 
         /// <summary>
@@ -184,7 +196,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public Child GetChild(long id)
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             var child = kindergardens
                 .SelectMany(kg => kg.Groups)
                 .SelectMany(gcr => gcr.GroupChildRelation)
@@ -201,7 +213,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public string GetChildsKindergarden(long id)
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
 
             foreach (var kg in kindergardens)
             {
@@ -219,15 +231,47 @@ namespace KindergardenStatistics.BL
 
             return null;
         }
+        
+        /// <summary>
+        /// Returns children count in different kindergardens
+        /// </summary>
+        /// <returns></returns>
+        public RequestData GetKindergardensChildrenCount()
+        {
+            var requestData = new RequestData();
+            var kindergardensChildrenCount = new List<KindergardenChildren>();
+            var kindergardens = repository.GetKindergardens();
+            int childrenCount;
+
+            foreach (var kindergarden in kindergardens)
+            {
+                childrenCount = 0;
+                foreach (var group in kindergarden.Groups)
+                {
+                    foreach (var groupChild in group.GroupChildRelation)
+                    {
+                        childrenCount++;
+                    }
+                }
+                kindergardensChildrenCount.Add(new KindergardenChildren()
+                {
+                    Name = kindergarden.Name,
+                    ChildrenCount = childrenCount,
+                });
+            }
+            requestData.KindergardenChildren = kindergardensChildrenCount;
+
+            return requestData;
+        }
 
         /// <summary>
         /// Returns most sick group
         /// </summary>
         /// <returns></returns>
-        public string GetMostSickGroup()
+        public Group GetMostSickGroup()
         {
-            var kindergardens = repo.GetKindergardens();
-            var mostSickGroupName = string.Empty;
+            var kindergardens = repository.GetKindergardens();
+            Group mostSickGroup = null;
             int mostSick = 0;
 
             foreach (var kg in kindergardens)
@@ -241,13 +285,17 @@ namespace KindergardenStatistics.BL
                     if (sick > mostSick)
                     {
                         mostSick = sick;
-                        mostSickGroupName = sick + " " + kg.Name + " " + group.Name;
+                        mostSickGroup = new Group()
+                        {
+                            KindergardenId = kg.Id,
+                            Name = group.Name,
+                        };
                     }
                     sick = 0;
                 }
             }
 
-            return mostSickGroupName;
+            return mostSickGroup;
         }
 
         /// <summary>
@@ -256,7 +304,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public string GetHealthiestGroup()
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             var healthiestGroupName = string.Empty;
             var leastSick = int.MaxValue;
 
@@ -286,7 +334,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public List<int> GetChildrenIdOrderedByAttendance()
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             Dictionary<int, int> childrenAttendance = new Dictionary<int, int>();
 
             childrenAttendance = kindergardens
@@ -305,7 +353,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public List<string> GetTopTwoKgNamesOrderedByAttendance()
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             Dictionary<string, int> kgAttendance = new Dictionary<string, int>();
 
             foreach (var kg in kindergardens)
@@ -330,7 +378,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public string GetMostSickKg()
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             var mostSickKgName = string.Empty;
             int mostSick = 0;
 
@@ -358,7 +406,7 @@ namespace KindergardenStatistics.BL
         /// <returns></returns>
         public string GetHealthiestKg()
         {
-            var kindergardens = repo.GetKindergardens();
+            var kindergardens = repository.GetKindergardens();
             var healthiestKgName = string.Empty;
             int leastSick = int.MaxValue;
 

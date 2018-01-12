@@ -1,15 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.Service", "KindergardenStatistics.Service\KindergardenStatistics.Service.csproj", "{23E6455D-1705-49A2-98CB-CB046A14C3E9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.DAL", "KindergardenStatistics.DAL\KindergardenStatistics.DAL.csproj", "{478068BB-BBE3-4AA1-B3B2-806DD6D565E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KindergardenStatistics.BL", "KindergardenStatistics.BL\KindergardenStatistics.BL.csproj", "{AD1973BC-48CE-4A85-A439-9807F2B06B09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.BL", "KindergardenStatistics.BL\KindergardenStatistics.BL.csproj", "{AD1973BC-48CE-4A85-A439-9807F2B06B09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KindergardenStatistics.BL.Tests", "KindergardenStatistics.BL.Tests\KindergardenStatistics.BL.Tests.csproj", "{3523EDD0-0C3A-405A-BE43-2A13C71A1D68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.BL.Tests", "KindergardenStatistics.BL.Tests\KindergardenStatistics.BL.Tests.csproj", "{3523EDD0-0C3A-405A-BE43-2A13C71A1D68}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.DataImport.Service", "KindergardenStatistics.DataImport.Service\KindergardenStatistics.DataImport.Service.csproj", "{EC64921F-BEEA-4BDA-9E22-6D4E8775BB1E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KindergardenStatistics.Service.StatisticsService", "KindergardenStatistics.Service.StatisticsService\KindergardenStatistics.Service.StatisticsService.csproj", "{6CB82AC5-9607-4AD4-ADEE-F35A83C9739B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KindergardenStatistics.Model", "KindergardenStatistics.Model\KindergardenStatistics.Model.csproj", "{707ADD2A-0C53-42EB-80DE-DE5FF8A187DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{3523EDD0-0C3A-405A-BE43-2A13C71A1D68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3523EDD0-0C3A-405A-BE43-2A13C71A1D68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3523EDD0-0C3A-405A-BE43-2A13C71A1D68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC64921F-BEEA-4BDA-9E22-6D4E8775BB1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC64921F-BEEA-4BDA-9E22-6D4E8775BB1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC64921F-BEEA-4BDA-9E22-6D4E8775BB1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC64921F-BEEA-4BDA-9E22-6D4E8775BB1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CB82AC5-9607-4AD4-ADEE-F35A83C9739B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CB82AC5-9607-4AD4-ADEE-F35A83C9739B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CB82AC5-9607-4AD4-ADEE-F35A83C9739B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CB82AC5-9607-4AD4-ADEE-F35A83C9739B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{707ADD2A-0C53-42EB-80DE-DE5FF8A187DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707ADD2A-0C53-42EB-80DE-DE5FF8A187DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707ADD2A-0C53-42EB-80DE-DE5FF8A187DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707ADD2A-0C53-42EB-80DE-DE5FF8A187DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

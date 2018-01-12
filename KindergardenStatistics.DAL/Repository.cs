@@ -3,10 +3,11 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace KindergardenStatistics.DAL
 {
-    public class Repository
+    public class Repository : IRepository
     {
         private KindergardenContext context;
 
@@ -22,8 +23,15 @@ namespace KindergardenStatistics.DAL
         public List<Kindergarden> GetKindergardens()
         {
             var kindergardens = context.Kindergarden.Include("Groups.GroupChildRelation.Child.Attendance");
+            
+            return kindergardens.Take(140).ToList();
+        }
 
-            return kindergardens.ToList();
+        public List<string> GetKindergardensNames()
+        {
+            var kindergardensNames = context.Kindergarden.Select(x => x.Name);
+
+            return kindergardensNames.ToList();
         }
 
         /// <summary>

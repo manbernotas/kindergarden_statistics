@@ -6,6 +6,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KindergardenStatistics.DAL\KindergardenStatistics.DAL.csproj" />
+    <ProjectReference Include="..\KindergardenStatistics.Model\KindergardenStatistics.Model.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.AspNetCore.Http.Features">
+      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.http.features\2.0.1\lib\netstandard2.0\Microsoft.AspNetCore.Http.Features.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

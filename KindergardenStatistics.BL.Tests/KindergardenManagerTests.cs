@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 //TODO: (later) Moq library
 
@@ -195,6 +194,8 @@ namespace KindergardenStatistics.BL.Tests
         public void Cleanup()
         {
             context.Database.EnsureDeleted();
+            kindergardenManager = null;
+            context = null;
         }
 
         [TestMethod]
@@ -208,44 +209,50 @@ namespace KindergardenStatistics.BL.Tests
         [TestMethod]
         public void GetChildOK()
         {
-            for (int i = 1; i < 6; i++)
-            {
-                var child = kindergardenManager.GetChild(i);
-                Assert.AreEqual(i, child.Id);
-            }
+            var child = kindergardenManager.GetChild(1);
+            Assert.IsNotNull(child);
+            Assert.AreEqual(1, child.Id);
+        }
+
+        [TestMethod]
+        public void GetChildFail()
+        {
+                var child = kindergardenManager.GetChild(6);
+                Assert.IsNull(child);
         }
 
         [TestMethod]
         public void GetChildsKindergardenOK()
         {
-            for (int i = 1; i < 4; i++)
-            {
-                var childKindergarden = kindergardenManager.GetChildsKindergarden(i);
-                Assert.AreEqual("kindergarden1", childKindergarden);
-            }
-            for (int i = 4; i < 6; i++)
-            {
-                var childKindergarden = kindergardenManager.GetChildsKindergarden(i);
-                Assert.AreEqual("kindergarden2", childKindergarden);
-            }
+            var childKindergarden = kindergardenManager.GetChildsKindergarden(1);
+            Assert.AreEqual("kindergarden1", childKindergarden);
+        }
+
+        [TestMethod]
+        public void GetChildsKindergardenFail()
+        {
+            var childKindergarden = kindergardenManager.GetChildsKindergarden(6);
+            Assert.IsNull(childKindergarden);
         }
 
         [TestMethod]
         public void GetMostSickGroupOK()
         {
             var mostSickGroup = kindergardenManager.GetMostSickGroup();
-            Assert.AreEqual("10 kindergarden2 group1", mostSickGroup);
+            Assert.AreEqual(mostSickGroup.Name, "group1");
+            Assert.AreEqual(mostSickGroup.KindergardenId, 2);
         }
 
         [TestMethod]
         public void ConvertDataOK()
         {
-            var data = new List<string>();
-            data.Add("Nr;KindergardenName;GroupName;ChildId;RegisteredInCity;Sick;OtherReasons;NoReasons;SpareDays");
-            data.Add("1;Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21");
+            var data = new List<string>
+            {
+                "Nr;KindergardenName;GroupName;ChildId;RegisteredInCity;Sick;OtherReasons;NoReasons;SpareDays",
+                "1;Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21"
+            };
 
             var kindergardenData = kindergardenManager.ConvertData(data.ToArray());
-
             Assert.AreEqual(kindergardenData.Kindergardens.Single().Name, "Aitvaras");
             Assert.AreEqual(kindergardenData.GroupNames.Single().Name, "\"VIJURKAI (ALERG.)\"");
             Assert.AreEqual(kindergardenData.Children.Single().Id, 9649742132);
@@ -258,15 +265,20 @@ namespace KindergardenStatistics.BL.Tests
         [TestMethod]
         public void ConvertDataFail()
         {
-            var data = new List<string>();
-            data.Add("Nr;KindergardenName;GroupName;ChildId;RegisteredInCity;Sick;OtherReasons;NoReasons;SpareDays");
-            data.Add("Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21");
+            // Arrange 
+            var data = new List<string>
+            {
+                "Nr;KindergardenName;GroupName;ChildId;RegisteredInCity;Sick;OtherReasons;NoReasons;SpareDays",
+                "Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21",
+                "1;Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21",
+                "1;Aitvaras;\"VIJURKAI (ALERG.)\";9649742132;1;21;0;0;21"
+            };
 
+            // Act
             var kindergardenData = kindergardenManager.ConvertData(data.ToArray());
 
-            Assert.AreNotEqual(kindergardenData.Kindergardens.Single().Name, "Aitvaras");
-            Assert.AreNotEqual(kindergardenData.GroupNames.Single().Name, "\"VIJURKAI (ALERG.)\"");
-            Assert.AreNotEqual(kindergardenData.Children.Single().Id, 9649742132);
+            // Assert
+            Assert.AreEqual(2, kindergardenData.Kindergardens.Count());
         }
     }
 }

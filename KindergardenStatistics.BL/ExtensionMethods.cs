@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KindergardenStatistics.DAL;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,12 +7,15 @@ namespace KindergardenStatistics.BL
 {
     public static class ExtensionMethods
     {
-        public static void BulkSaveChanges(int count)
+        /// <summary>
+        /// Method to compare two kindergardens objects
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static int CompareKindergardens(this Kindergarden x, Kindergarden y)
         {
-            if (count > 1 && count % 5000 == 0)
-            {
-                //context.SaveChanges();
-            }
+            return x.Name.CompareTo(y.Name);
         }
     }
 }
